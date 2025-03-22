@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Categoria</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Detalhes da Categoria</h2>
+        <form id="formCategoria">
+            <div class="form-group">
+                <label for="descricao">Descrição:</label>
+                <input type="text" id="descricao" name="descricao">
+            </div>
+            <div class="form-group">
+                <label for="tipo">Tipo:</label>
+                <select id="tipo" name="tipo">
+                    <option value="Despesa">Despesa</option>
+                    <option value="Receita">Receita</option>
+                </select>
+            </div>
+        </form>
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn-voltar" onclick="window.history.back()">Voltar</button>
+    </div>
+
+</body>
+
+</html>

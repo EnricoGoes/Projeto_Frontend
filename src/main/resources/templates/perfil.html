@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil do Usuário</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Informações do Usuário</h2>
+        <form id="formUsuario">
+            <div class="form-group">
+                <label for="nome">Nome:</label>
+                <input type="text" id="nome">
+            </div>
+            <div class="form-group">
+                <label for="cpf">CPF:</label>
+                <input type="text" id="cpf">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email">
+            </div>
+            <div class="form-group">
+                <label for="login">Login:</label>
+                <input type="text" id="login">
+            </div>
+            <div class="form-group">
+                <label for="senha">Senha:</label>
+                <input type="password" id="senha">
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Informações de Telefone</h2>
+        <form id="formTelefone">
+            <div class="form-group">
+                <label for="tipoTelefone">Tipo:</label>
+                <input type="text" id="tipoTelefone">
+            </div>
+            <div class="form-group">
+                <label for="numeroTelefone">Número:</label>
+                <input type="text" id="numeroTelefone">
+            </div>
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>Informações de Endereço</h2>
+        <form id="formEndereco">
+            <div class="form-group">
+                <label for="rua">Rua:</label>
+                <input type="text" id="rua">
+            </div>
+            <div class="form-group">
+                <label for="bairro">Bairro:</label>
+                <input type="text" id="bairro">
+            </div>
+            <div class="form-group">
+                <label for="numeroEndereco">Número:</label>
+                <input type="text" id="numeroEndereco">
+            </div>
+            <div class="form-group">
+                <label for="cep">CEP:</label>
+                <input type="text" id="cep">
+            </div>
+        </form>
+    </div>
+
+    <div class="buttons">
+        <button type="button" class="btn-editar" id="btnEditar">Editar Usuario</button>
+        <button type="button" class="btn-deletar" id="btnDeletar">Deletar Usuario</button>
+        <button type="button" class="btn-voltar" onclick="window.history.back()">Voltar</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const API_URL = "http://localhost:8081/usuario";
+            const userId = getCookie('userId');
+
+            if (!userId) {
+                alert('Usuário não está logado.');
+                window.location.href = '/';
+                return;
+            }
+
+            // Função para obter o valor de um cookie pelo nome
+            function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+
+            // Função para carregar as informações do usuário
+            async function carregarInformacoesUsuario() {
+                try {
+                    const resposta = await fetch(`${API_URL}/${userId}`);
+                    if (!resposta.ok) {
+                        throw new Error("Erro ao buscar informações do usuário");
+                    }
+                    const usuario = await resposta.json();
+                    document.getElementById('nome').value = usuario.nome;
+                    document.getElementById('cpf').value = usuario.cpf;
+                    document.getElementById('email').value = usuario.email;
+                    document.getElementById('login').value = usuario.login;
+                    document.getElementById('senha').value = usuario.senha;
+                    document.getElementById('tipoTelefone').value = usuario.telefone.tipo;
+                    document.getElementById('numeroTelefone').value = usuario.telefone.numero;
+                    document.getElementById('rua').value = usuario.endereco.rua;
+                    document.getElementById('bairro').value = usuario.endereco.bairro;
+                    document.getElementById('numeroEndereco').value = usuario.endereco.numero;
+                    document.getElementById('cep').value = usuario.endereco.cep;
+                } catch (error) {
+                    console.error("Erro ao carregar informações do usuário:", error);
+                }
+            }
+
+            // Função para editar as informações do usuário
+            async function editarUsuario() {
+                const usuario = {
+                    nome: document.getElementById('nome').value,
+                    cpf: document.getElementById('cpf').value,
+                    email: document.getElementById('email').value,
+                    login: document.getElementById('login').value,
+                    senha: document.getElementById('senha').value,
+                    telefone: {
+                        tipo: document.getElementById('tipoTelefone').value,
+                        numero: document.getElementById('numeroTelefone').value
+                    },
+                    endereco: {
+                        rua: document.getElementById('rua').value,
+                        bairro: document.getElementById('bairro').value,
+                        numero: document.getElementById('numeroEndereco').value,
+                        cep: document.getElementById('cep').value
+                    }
+                };
+
+                try {
+                    const resposta = await fetch(`${API_URL}/${userId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(usuario)
+                    });
+                    if (!resposta.ok) {
+                        throw new Error("Erro ao editar informações do usuário");
+                    }
+                    alert('Informações do usuário atualizadas com sucesso!');
+                    carregarInformacoesUsuario(); // Recarrega as informações atualizadas
+                } catch (error) {
+                    console.error("Erro ao editar informações do usuário:", error);
+                }
+            }
+
+            // Função para deletar o usuário com validação de login
+            async function deletarUsuario() {
+                if (!confirm("Tem certeza que deseja deletar este usuário?")) {
+                    return; // Se o usuário cancelar, a função para aqui
+                }
+
+                try {
+                    const respostaDeletar = await fetch(`${API_URL}/${userId}`, {
+                        method: 'DELETE'
+                    });
+
+                    if (!respostaDeletar.ok) {
+                        throw new Error("Erro ao deletar usuário");
+                    }
+
+                    alert('Usuário deletado com sucesso!');
+                    document.cookie = 'userId=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                    window.location.href = '/';
+                } catch (error) {
+                    console.error("Erro ao deletar usuário:", error);
+                }
+            }
+
+            // Carrega as informações do usuário ao carregar a página
+            carregarInformacoesUsuario();
+
+            // Adiciona eventos aos botões
+            document.getElementById('btnEditar').addEventListener('click', editarUsuario);
+            document.getElementById('btnDeletar').addEventListener('click', deletarUsuario);
+        });
+    </script>
+</body>
+
+</html>
