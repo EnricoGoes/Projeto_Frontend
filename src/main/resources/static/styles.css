@@ -1,4 +1,3 @@
-/* Estilos gerais */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f4f4f4;
@@ -21,7 +20,6 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* Estilos do formulário */
 .form-group {
     margin-bottom: 15px;
 }
@@ -51,7 +49,6 @@ h2 {
     outline: none;
 }
 
-/* Estilos das parcelas */
 #parcelasContainer {
     margin-top: 30px;
 }
@@ -82,7 +79,6 @@ h2 {
     background-color: #0056b3;
 }
 
-/* Estilos dos botões */
 .buttons, .dashboard-header {
     text-align: center;
     margin-top: 20px;
@@ -122,7 +118,6 @@ h2 {
     background-color: #c82333;
 }
 
-/* Estilos da dashboard */
 .dashboard-container {
     max-width: 1200px;
     margin: 50px auto;
@@ -213,7 +208,6 @@ h2 {
     background-color: #c82333;
 }
 
-/* Estilos das categorias */
 .categoria {
     margin-bottom: 20px;
     border: 1px solid #ccc;

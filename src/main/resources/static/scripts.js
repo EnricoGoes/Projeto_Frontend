@@ -18,7 +18,6 @@ async function fetchData(url) {
     }
 }
 
-// Mover a função getCookie para fora do DOMContentLoaded
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
     }
 
-    // Verificação para redirecionar o usuário para o dashboard se ele tentar acessar a página de login
     if (window.location.pathname === '/login') {
         window.location.href = '/dashboard';
         return;

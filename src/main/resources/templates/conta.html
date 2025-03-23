@@ -51,7 +51,6 @@
     <div class="container" id="parcelasContainer" style="display: none;">
         <h2>Parcelas</h2>
         <div id="parcelasList">
-            <!-- As parcelas serão inseridas aqui pelo JavaScript -->
         </div>
     </div>
 
@@ -68,7 +67,6 @@
 
             let usuarioId;
 
-            // Função para obter o ID do usuário logado a partir do cookie
             function getUsuarioIdFromCookie() {
                 const name = "userId=";
                 const decodedCookie = decodeURIComponent(document.cookie);
@@ -154,7 +152,6 @@
                         parcelasList.appendChild(parcelaDiv);
                     });
 
-                    // Atualizar o número de parcelas no campo de entrada
                     document.getElementById("parcelas").value = parcelas.length;
                 } catch (error) {
                     console.error("Erro ao buscar as parcelas:", error);
@@ -190,7 +187,7 @@
                         if (numeroParcelas > 0) {
                             await addParcelas(novaConta.id, valor, numeroParcelas);
                         }
-                        window.location.href = "/dashboard"; // Redirecionar para o dashboard após adicionar uma nova conta
+                        window.location.href = "/dashboard";
                     } else {
                         const errorText = await response.text();
                         console.error("Erro ao adicionar conta:", response.status, errorText);
@@ -230,8 +227,8 @@
                         } else {
                             await deletarParcelas(id);
                         }
-                        await getConta(id); // Atualizar os detalhes da conta na página
-                        await getParcelas(id); // Atualizar as parcelas na página
+                        await getConta(id);
+                        await getParcelas(id);
                         showAlert("Informações da conta atualizadas com sucesso.", "success");
                     } else {
                         const errorText = await response.text();
@@ -381,7 +378,6 @@
                         categoriaSelect.appendChild(option);
                     });
 
-                    // Atualizar a categoria selecionada após carregar as categorias
                     if (id) {
                         const contaResponse = await fetch(`http://localhost:8081/contas/${id}`);
                         const conta = await contaResponse.json();

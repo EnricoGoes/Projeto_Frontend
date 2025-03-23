@@ -88,14 +88,12 @@
                 return;
             }
 
-            // Função para obter o valor de um cookie pelo nome
             function getCookie(name) {
                 const value = `; ${document.cookie}`;
                 const parts = value.split(`; ${name}=`);
                 if (parts.length === 2) return parts.pop().split(';').shift();
             }
 
-            // Função para carregar as informações do usuário
             async function carregarInformacoesUsuario() {
                 try {
                     const resposta = await fetch(`${API_URL}/${userId}`);
@@ -119,7 +117,6 @@
                 }
             }
 
-            // Função para editar as informações do usuário
             async function editarUsuario() {
                 const usuario = {
                     nome: document.getElementById('nome').value,
@@ -151,16 +148,15 @@
                         throw new Error("Erro ao editar informações do usuário");
                     }
                     alert('Informações do usuário atualizadas com sucesso!');
-                    carregarInformacoesUsuario(); // Recarrega as informações atualizadas
+                    carregarInformacoesUsuario();
                 } catch (error) {
                     console.error("Erro ao editar informações do usuário:", error);
                 }
             }
 
-            // Função para deletar o usuário com validação de login
             async function deletarUsuario() {
                 if (!confirm("Tem certeza que deseja deletar este usuário?")) {
-                    return; // Se o usuário cancelar, a função para aqui
+                    return;
                 }
 
                 try {
@@ -180,10 +176,8 @@
                 }
             }
 
-            // Carrega as informações do usuário ao carregar a página
             carregarInformacoesUsuario();
 
-            // Adiciona eventos aos botões
             document.getElementById('btnEditar').addEventListener('click', editarUsuario);
             document.getElementById('btnDeletar').addEventListener('click', deletarUsuario);
         });
