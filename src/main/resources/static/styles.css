@@ -1,0 +1,265 @@
+/* Estilos gerais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+.container, .dashboard-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Estilos do formulário */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-group input[type="date"] {
+    padding: 8px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Estilos das parcelas */
+#parcelasContainer {
+    margin-top: 30px;
+}
+
+.parcela {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+.parcela p {
+    margin: 5px 0;
+}
+
+.parcela button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.parcela button:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos dos botões */
+.buttons, .dashboard-header {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.buttons button, .dashboard-header button, .btn-visualizar, .btn-cadastrar, .btn-editar, .btn-deletar, #btnLogout {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    margin: 0 10px;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.buttons button:hover, .dashboard-header button:hover, .btn-visualizar:hover, .btn-cadastrar:hover, .btn-editar:hover, .btn-deletar:hover, #btnLogout:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.buttons .btn-voltar {
+    background-color: #6c757d;
+}
+
+.buttons .btn-voltar:hover {
+    background-color: #5a6268;
+}
+
+#btnLogout {
+    background-color: #dc3545;
+}
+
+#btnLogout:hover {
+    background-color: #c82333;
+}
+
+/* Estilos da dashboard */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.dashboard-header h2 {
+    margin: 0;
+    color: #333;
+}
+
+.dashboard-header button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.dashboard-header button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.dashboard-table th,
+.dashboard-table td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.dashboard-table th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.dashboard-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.dashboard-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+.dashboard-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.dashboard-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.dashboard-actions button:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);
+}
+
+.dashboard-actions .btn-deletar {
+    background-color: #dc3545;
+}
+
+.dashboard-actions .btn-deletar:hover {
+    background-color: #c82333;
+}
+
+/* Estilos das categorias */
+.categoria {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.categoria h3 {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0;
+    padding: 10px;
+    background-color: #007bff;
+    color: #fff;
+}
+
+.categoria p {
+    padding: 10px;
+    background-color: #f9f9f9;
+    margin: 0;
+    border-top: none;
+}
+
+.categoria table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.categoria th,
+.categoria td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+.categoria th {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.categoria tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.categoria tr:hover {
+    background-color: #f1f1f1;
+}

@@ -18,17 +18,24 @@ async function fetchData(url) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-    }
+// Mover a função getCookie para fora do DOMContentLoaded
+function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
 
+document.addEventListener("DOMContentLoaded", () => {
     const userId = getCookie('userId');
     if (!userId) {
         alert('Usuário não está logado.');
         window.location.href = '/';
+        return;
+    }
+
+    // Verificação para redirecionar o usuário para o dashboard se ele tentar acessar a página de login
+    if (window.location.pathname === '/login') {
+        window.location.href = '/dashboard';
         return;
     }
 
@@ -43,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function BotoesCategoria(categoria) {
     return `
-        <button class="btn-nova" onclick="editarCategoria(${categoria.id})">Editar</button>
+        <button class="btn-editar" onclick="editarCategoria(${categoria.id})">Editar</button>
         <button class="btn-deletar" onclick="deletarCategoria(${categoria.id})">Deletar</button>
     `;
 }
@@ -127,6 +134,17 @@ async function deletarCategoria(id) {
     try {
         const resposta = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
         if (!resposta.ok) {
+            if (resposta.status === 404) {
+                console.log("Categoria não encontrada para deletar.");
+                alert("Categoria não encontrada. Ela pode já ter sido deletada.");
+                const userId = getCookie('userId');
+                getContas(userId);
+                return;
+            } else if (resposta.status === 500) {
+                console.error("Erro interno do servidor ao deletar categoria.");
+                alert("Erro interno do servidor. Tente novamente mais tarde.");
+                return;
+            }
             throw new Error("Erro ao deletar categoria");
         }
         alert("Categoria deletada com sucesso!");
@@ -146,6 +164,13 @@ async function deletarConta(id) {
     try {
         const resposta = await fetch(`${API_URL2}/${id}`, { method: "DELETE" });
         if (!resposta.ok) {
+            if (resposta.status === 404) {
+                console.log("Conta não encontrada para deletar.");
+                alert("Conta não encontrada. Ela pode já ter sido deletada.");
+                const userId = getCookie('userId');
+                getContas(userId);
+                return;
+            }
             throw new Error("Erro ao deletar conta");
         }
         alert("Conta deletada com sucesso!");
@@ -155,4 +180,19 @@ async function deletarConta(id) {
         console.error("Erro ao deletar conta:", error);
         alert("Erro ao deletar conta. Tente novamente.");
     }
+}
+
+function navegar(rota, id, modo) {
+    const url = new URL(window.location.origin + rota);
+    url.searchParams.append("id", id);
+    url.searchParams.append("modo", modo);
+    window.location.href = url.toString();
+}
+
+function verDetalhesConta(id) {
+    navegar("/cadastrarConta", id, "editar");
+}
+
+function editarCategoria(id) {
+    navegar("/cadastrarCategoria", id, "editar");
 }

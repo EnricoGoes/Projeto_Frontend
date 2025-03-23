@@ -14,7 +14,7 @@
         <form id="formCategoria">
             <div class="form-group">
                 <label for="descricao">Descrição:</label>
-                <input type="text" id="descricao" name="descricao">
+                <input type="text" id="descricao" name="descricao" required>
             </div>
             <div class="form-group">
                 <label for="tipo">Tipo:</label>
@@ -27,8 +27,65 @@
     </div>
 
     <div class="buttons">
+        <button type="button" class="btn-salvar" id="btnSalvar">Salvar</button>
         <button type="button" class="btn-voltar" onclick="window.history.back()">Voltar</button>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get("id");
+            const modo = params.get("modo") || "";
+
+            if (id) {
+                await getCategoria(id);
+            }
+
+            async function getCategoria(id) {
+                try {
+                    const response = await fetch(`http://localhost:8081/categoria/${id}`);
+                    const categoria = await response.json();
+                    console.log("Dados da categoria:", categoria);
+
+                    if (categoria && categoria.descricao) {
+                        document.getElementById("descricao").value = categoria.descricao;
+                        document.getElementById("tipo").value = categoria.tipo;
+                    } else {
+                        console.error("Erro: Descrição da categoria não encontrada!");
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar a categoria:", error);
+                }
+            }
+
+            async function salvarCategoria() {
+                const descricao = document.getElementById("descricao").value.trim();
+                const tipo = document.getElementById("tipo").value;
+                const categoria = { descricao, tipo };
+                const url = id ? `http://localhost:8081/categoria/${id}` : "http://localhost:8081/categoria";
+                const method = id ? "PUT" : "POST";
+
+                try {
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(categoria)
+                    });
+                    if (response.ok) {
+                        window.location.href = "/dashboard";
+                    } else {
+                        console.error(`Erro ao ${id ? "atualizar" : "adicionar"} categoria:`, response.status);
+                    }
+                } catch (erro) {
+                    console.error(`Erro ao ${id ? "atualizar" : "adicionar"} categoria:`, erro);
+                }
+            }
+
+            document.getElementById("btnSalvar").addEventListener("click", salvarCategoria);
+        });
+    </script>
 
 </body>
 

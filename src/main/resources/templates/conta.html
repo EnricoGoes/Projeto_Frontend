@@ -11,18 +11,19 @@
 <body>
     <div class="container">
         <h2>Detalhes da Conta</h2>
+        <div id="alertContainer" style="display: none;" class="alert"></div>
         <form id="formConta">
             <div class="form-group">
                 <label for="descricao">Descrição:</label>
-                <input type="text" id="descricao" name="descricao">
+                <input type="text" id="descricao" name="descricao" required>
             </div>
             <div class="form-group">
                 <label for="valor">Valor:</label>
-                <input type="number" id="valor" name="valor">
+                <input type="number" id="valor" name="valor" required>
             </div>
             <div class="form-group">
                 <label for="dataVencimento">Data de Vencimento:</label>
-                <input type="date" id="dataVencimento" name="dataVencimento">
+                <input type="date" id="dataVencimento" name="dataVencimento" required>
             </div>
             <div class="form-group">
                 <label for="dataPagamento">Data de Pagamento:</label>
@@ -30,32 +31,386 @@
             </div>
             <div class="form-group">
                 <label for="status">Status:</label>
-                <select id="status" name="status">
+                <select id="status" name="status" required>
                     <option value="true">Pago</option>
                     <option value="false">Não Pago</option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="nomeUsuario">Nome do Usuário:</label>
-                <input type="text" id="nomeUsuario" name="nomeUsuario" readonly>
+                <label for="categoria">Categoria:</label>
+                <select id="categoria" name="categoria" required>
+                </select>
             </div>
             <div class="form-group">
-                <label for="nomeCategoria">Nome da Categoria:</label>
-                <input type="text" id="nomeCategoria" name="nomeCategoria" readonly>
+                <label for="parcelas">Número de Parcelas:</label>
+                <input type="number" id="parcelas" name="parcelas" min="0" max="12" value="0" required>
             </div>
         </form>
     </div>
 
-    <div class="container">
+    <div class="container" id="parcelasContainer" style="display: none;">
         <h2>Parcelas</h2>
-        <div id="parcelasContainer">
-           <a href="/parcelas" class="parcela">Ver Parcelas</a>
+        <div id="parcelasList">
+            <!-- As parcelas serão inseridas aqui pelo JavaScript -->
         </div>
     </div>
 
     <div class="buttons">
+        <button type="button" class="btn-salvar" id="btnSalvar">Salvar</button>
         <button type="button" class="btn-voltar" onclick="window.history.back()">Voltar</button>
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get("id");
+            const modo = params.get("modo") || "";
+
+            let usuarioId;
+
+            // Função para obter o ID do usuário logado a partir do cookie
+            function getUsuarioIdFromCookie() {
+                const name = "userId=";
+                const decodedCookie = decodeURIComponent(document.cookie);
+                const ca = decodedCookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) === ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) === 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
+
+            usuarioId = getUsuarioIdFromCookie();
+
+            if (!usuarioId) {
+                console.error("Usuário não está logado.");
+                return;
+            }
+
+            if (id) {
+                await getConta(id);
+                await getParcelas(id);
+                document.getElementById("parcelasContainer").style.display = "block";
+            }
+
+            await carregarCategorias();
+
+            async function getConta(id) {
+                try {
+                    const response = await fetch(`http://localhost:8081/contas/${id}`);
+                    const conta = await response.json();
+                    console.log("Dados da conta:", conta);
+
+                    if (conta && conta.descricao) {
+                        document.getElementById("descricao").value = conta.descricao;
+                        document.getElementById("valor").value = conta.valor;
+                        document.getElementById("dataVencimento").value = conta.dataVencimento;
+                        document.getElementById("dataPagamento").value = conta.dataPagamento;
+                        document.getElementById("status").value = conta.status;
+                        document.getElementById("categoria").value = conta.categoriaId;
+                        document.getElementById("parcelas").value = conta.parcelas ? conta.parcelas.length : 0;
+                    } else {
+                        console.error("Erro: Descrição da conta não encontrada!");
+                    }
+                } catch (error) {
+                    console.error("Erro ao buscar a conta:", error);
+                }
+            }
+
+            async function getParcelas(contaId) {
+                try {
+                    const response = await fetch(`http://localhost:8081/parcelas/conta/${contaId}`);
+                    if (!response.ok) {
+                        if (response.status === 404) {
+                            console.log("Nenhuma parcela encontrada para esta conta.");
+                            return;
+                        }
+                        throw new Error(`Erro ao buscar parcelas: ${response.statusText}`);
+                    }
+                    const parcelas = await response.json();
+                    console.log("Dados das parcelas:", parcelas);
+
+                    const parcelasList = document.getElementById("parcelasList");
+                    parcelasList.innerHTML = '';
+
+                    parcelas.forEach(parcela => {
+                        const parcelaDiv = document.createElement('div');
+                        parcelaDiv.classList.add('parcela');
+                        parcelaDiv.innerHTML = `
+                            <p>Descrição: ${parcela.descricaoConta}</p>
+                            <p>Valor: ${parcela.valorParcela}</p>
+                            <p>Data de Vencimento: ${parcela.dataVencimentoParcela}</p>
+                            <p>Número da Parcela: ${parcela.numeroParcela}</p>
+                            <p>Status: ${parcela.statusParcela ? 'Pago' : 'Não Pago'}</p>
+                            <button onclick="alterarStatusParcela(${parcela.idParcelas}, ${!parcela.statusParcela})">
+                                Marcar como ${parcela.statusParcela ? 'Não Pago' : 'Pago'}
+                            </button>
+                        `;
+                        parcelasList.appendChild(parcelaDiv);
+                    });
+
+                    // Atualizar o número de parcelas no campo de entrada
+                    document.getElementById("parcelas").value = parcelas.length;
+                } catch (error) {
+                    console.error("Erro ao buscar as parcelas:", error);
+                }
+            }
+
+            async function addConta() {
+                const descricao = document.getElementById("descricao").value.trim();
+                const valor = document.getElementById("valor").value;
+                const dataVencimento = document.getElementById("dataVencimento").value;
+                const dataPagamento = document.getElementById("dataPagamento").value;
+                const status = document.getElementById("status").value === 'true';
+                const categoriaId = document.getElementById("categoria").value;
+                const numeroParcelas = parseInt(document.getElementById("parcelas").value, 10);
+
+                if (!descricao || !valor || !dataVencimento || !categoriaId) {
+                    showAlert("Todos os campos obrigatórios devem ser preenchidos.", "error");
+                    return;
+                }
+
+                const conta = { descricao, valor, dataVencimento, dataPagamento, status, categoriaId, usuarioId };
+
+                try {
+                    const response = await fetch("http://localhost:8081/contas", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(conta)
+                    });
+                    if (response.ok) {
+                        const novaConta = await response.json();
+                        if (numeroParcelas > 0) {
+                            await addParcelas(novaConta.id, valor, numeroParcelas);
+                        }
+                        window.location.href = "/dashboard"; // Redirecionar para o dashboard após adicionar uma nova conta
+                    } else {
+                        const errorText = await response.text();
+                        console.error("Erro ao adicionar conta:", response.status, errorText);
+                    }
+                } catch (erro) {
+                    console.error("Erro ao adicionar conta:", erro);
+                }
+            }
+
+            async function atualizarConta(id) {
+                const descricao = document.getElementById("descricao").value.trim();
+                const valor = document.getElementById("valor").value;
+                const dataVencimento = document.getElementById("dataVencimento").value;
+                const dataPagamento = document.getElementById("dataPagamento").value;
+                const status = document.getElementById("status").value === 'true';
+                const categoriaId = document.getElementById("categoria").value;
+                const numeroParcelas = parseInt(document.getElementById("parcelas").value, 10);
+
+                if (!descricao || !valor || !dataVencimento || !categoriaId) {
+                    showAlert("Todos os campos obrigatórios devem ser preenchidos.", "error");
+                    return;
+                }
+
+                const conta = { descricao, valor, dataVencimento, dataPagamento, status, categoriaId, usuarioId };
+
+                try {
+                    const response = await fetch(`http://localhost:8081/contas/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(conta)
+                    });
+                    if (response.ok) {
+                        if (numeroParcelas > 0) {
+                            await atualizarParcelas(id, valor, numeroParcelas);
+                        } else {
+                            await deletarParcelas(id);
+                        }
+                        await getConta(id); // Atualizar os detalhes da conta na página
+                        await getParcelas(id); // Atualizar as parcelas na página
+                        showAlert("Informações da conta atualizadas com sucesso.", "success");
+                    } else {
+                        const errorText = await response.text();
+                        console.error("Erro ao atualizar conta:", response.status, errorText);
+                    }
+                } catch (erro) {
+                    console.error("Erro ao atualizar conta:", erro);
+                }
+            }
+
+            async function addParcelas(contaId, valor, numeroParcelas) {
+                const parcelas = [];
+                const valorParcela = valor / numeroParcelas;
+                let dataVencimento = new Date(document.getElementById("dataVencimento").value);
+
+                for (let i = 1; i <= numeroParcelas; i++) {
+                    parcelas.push({
+                        dataVencimentoParcela: dataVencimento.toISOString().split('T')[0],
+                        numeroParcela: i,
+                        valorParcela: valorParcela,
+                        statusParcela: false,
+                        contaId: contaId,
+                        descricaoConta: document.getElementById("descricao").value.trim()
+                    });
+                    dataVencimento.setMonth(dataVencimento.getMonth() + 1);
+                }
+
+                try {
+                    for (const parcela of parcelas) {
+                        const response = await fetch("http://localhost:8081/parcelas", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(parcela)
+                        });
+                        if (!response.ok) {
+                            console.error("Erro ao adicionar parcela:", response.status);
+                        }
+                    }
+                } catch (erro) {
+                    console.error("Erro ao adicionar parcelas:", erro);
+                }
+            }
+
+            async function atualizarParcelas(contaId, valor, numeroParcelas) {
+                const parcelas = [];
+                const valorParcela = valor / numeroParcelas;
+                let dataVencimento = new Date(document.getElementById("dataVencimento").value);
+
+                for (let i = 1; i <= numeroParcelas; i++) {
+                    parcelas.push({
+                        dataVencimentoParcela: dataVencimento.toISOString().split('T')[0],
+                        numeroParcela: i,
+                        valorParcela: valorParcela,
+                        statusParcela: false,
+                        contaId: contaId,
+                        descricaoConta: document.getElementById("descricao").value.trim()
+                    });
+                    dataVencimento.setMonth(dataVencimento.getMonth() + 1);
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:8081/parcelas/conta/${contaId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (response.ok || response.status === 404) {
+                        if (response.status === 404) {
+                            console.log("Nenhuma parcela encontrada para deletar.");
+                        }
+                        for (const parcela of parcelas) {
+                            const response = await fetch("http://localhost:8081/parcelas", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(parcela)
+                            });
+                            if (!response.ok) {
+                                console.error("Erro ao adicionar parcela:", response.status);
+                            }
+                        }
+                    } else {
+                        const errorText = await response.text();
+                        console.error("Erro ao deletar parcelas antigas:", response.status, errorText);
+                    }
+                } catch (erro) {
+                    console.error("Erro ao atualizar parcelas:", erro);
+                }
+            }
+
+            async function deletarParcelas(contaId) {
+                try {
+                    const response = await fetch(`http://localhost:8081/parcelas/conta/${contaId}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Content-Type": "application/json"
+                        }
+                    });
+
+                    if (!response.ok && response.status !== 404) {
+                        const errorText = await response.text();
+                        console.error("Erro ao deletar parcelas antigas:", response.status, errorText);
+                    } else if (response.status === 404) {
+                        console.log("Nenhuma parcela encontrada para deletar.");
+                    }
+                } catch (erro) {
+                    console.error("Erro ao deletar parcelas:", erro);
+                }
+            }
+
+            window.alterarStatusParcela = async function (idParcelas, novoStatus) {
+                try {
+                    const response = await fetch(`http://localhost:8081/parcelas/${idParcelas}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ statusParcela: novoStatus })
+                    });
+                    if (response.ok) {
+                        await getParcelas(id);
+                    } else {
+                        const errorText = await response.text();
+                        console.error("Erro ao atualizar status da parcela:", response.status, errorText);
+                    }
+                } catch (erro) {
+                    console.error("Erro ao atualizar status da parcela:", erro);
+                }
+            }
+
+            async function carregarCategorias() {
+                try {
+                    const response = await fetch("http://localhost:8081/categoria/listall");
+                    const categorias = await response.json();
+                    const categoriaSelect = document.getElementById('categoria');
+                    categoriaSelect.innerHTML = '';
+
+                    categorias.forEach(categoria => {
+                        const option = document.createElement('option');
+                        option.value = categoria.id;
+                        option.textContent = categoria.descricao;
+                        categoriaSelect.appendChild(option);
+                    });
+
+                    // Atualizar a categoria selecionada após carregar as categorias
+                    if (id) {
+                        const contaResponse = await fetch(`http://localhost:8081/contas/${id}`);
+                        const conta = await contaResponse.json();
+                        document.getElementById("categoria").value = conta.categoriaId;
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar categorias:", error);
+                }
+            }
+
+            function showAlert(message, type) {
+                const alertContainer = document.getElementById("alertContainer");
+                alertContainer.textContent = message;
+                alertContainer.className = `alert ${type}`;
+                alertContainer.style.display = "block";
+                setTimeout(() => {
+                    alertContainer.style.display = "none";
+                }, 3000);
+            }
+
+            document.getElementById("btnSalvar").addEventListener("click", async function () {
+                if (id) {
+                    await atualizarConta(id);
+                } else {
+                    await addConta();
+                }
+            });
+        });
+    </script>
 
 </body>
 
